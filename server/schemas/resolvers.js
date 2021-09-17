@@ -67,7 +67,7 @@ const resolvers = {
             return { token, user };
         },
 
-        addThought: async(parent, args, context) => {
+        addThought: async (parent, args, context) => {
             if (context.user) {
                 const thought = await Thought.create({ ...args, username: context.user.username });
 
@@ -83,7 +83,7 @@ const resolvers = {
             throw new AuthenticationError('You need to be logged in!');
         },
 
-        addReaction: async(parent, { thoughtId, reactionBody }, context) => {
+        addReaction: async (parent, { thoughtId, reactionBody }, context) => {
             if (context.user) {
                 const updatedThought = await Thought.findOneAndUpdate(
                     { _id: thoughtId },
@@ -95,7 +95,22 @@ const resolvers = {
             }
 
             throw new AuthenticationError('You need to be logged in!');
-        }
+        },
+
+        addFriend: async (parent, { friendId }, context) => {
+            if (context.user) {
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $addToSet: { friends: friendId } },
+                    { new: true }
+                ).populate('friends');
+
+                return updatedUser;
+            }
+            
+            throw new AuthenticationError('You need to be logged in!');
+        },
+        
     }
 };
 
